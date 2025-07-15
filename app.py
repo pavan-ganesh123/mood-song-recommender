@@ -40,7 +40,8 @@ os.makedirs(SONG_DIRECTORY, exist_ok=True)
 def home():
     return render_template("index.html")
 
-@app.route("/predict", methods=["POST"])
+@app.route("/api/predict", methods=["POST"])
+
 def predict():
     try:
         # 1) Parse JSON body
