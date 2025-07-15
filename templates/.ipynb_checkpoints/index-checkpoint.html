@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Mood Suggester</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <video autoplay muted loop class="video-background">
+        <source src="{{ url_for('static', filename='Earth_FrontPage.mp4') }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    
+    <div class="container">
+        <h1>🎶 Song Mood Suggester 🎶</h1>
+        <textarea id="user_input" placeholder="Enter your mood message..."></textarea>
+        <button onclick="getSongs()">Find Songs</button>
+        <div id="loading" style="display: none;"><h2>Loading...</h2></div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+    let currentAudio = null;
+
+    async function getSongs() {
+    let text = document.getElementById("user_input").value.trim();
+    
+    if (text === "") {
+        alert("Please enter a mood message!");
+        return;
+    }
+
+    // Show the loading GIF
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("result").innerHTML = "";
+
+    try {
+        // Submit the form data to the /predict route
+        let formData = new FormData();
+        formData.append("text", text);
+
+        let response = await fetch("/predict", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch songs");
+        }
+
+        // Wait for 5 seconds before redirecting
+        setTimeout(() => {
+            window.location.href = "/songs";
+        }, 3000); // 5000 milliseconds = 5 seconds
+
+    } catch (error) {
+        console.error("Error fetching songs:", error);
+        
+        let errorMessage = `<p>Error fetching songs. Please try again.</p>`;
+        
+        if (error.message) {
+            errorMessage += `<p>Details: ${error.message}</p>`;
+        }
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("result").innerHTML = errorMessage;
+    }
+}
+
+    function playSong(songPath, button) {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+        }
+        currentAudio = new Audio(songPath);
+        currentAudio.play();
+    }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 80%;
+            height: 100px;
+            border-radius: 10px;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            resize: none;
+        }
+        button {
+            background: #ff9800;
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #e68900;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #loading {
+            margin-top: 20px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .song-title {
+            font-weight: 500;
+        }
+        .mood {
+            font-weight: bold;
+            color: #ffcc00;
+        }
+    </style>
+</body>
+</html>

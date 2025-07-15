@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Recommendations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Recommended Songs 🎵</h1>
+        <h3>Detected Mood: <span id="mood" class="mood"></span></h3>
+        <div id="songList"></div>
+        <button onclick="goBack()">🔙 Back</button>
+    </div>
+
+    <script>
+        let songData = sessionStorage.getItem("songData");
+        if (songData) {
+            songData = JSON.parse(songData);
+            document.getElementById("mood").textContent = songData.mood;
+            
+            let songListHTML = "<ul>";
+            songData.songs.forEach(song => {
+                songListHTML += `
+                    <li>
+                        <span class="song-title">${song.song_name}</span>
+                        <button onclick="playSong('${song.file_path}')">▶️ Play</button>
+                    </li>
+                `;
+            });
+            songListHTML += "</ul>";
+
+            document.getElementById("songList").innerHTML = songListHTML;
+        }
+
+        function playSong(songPath) {
+            let audio = new Audio(songPath);
+            audio.play();
+        }
+
+        function goBack() {
+            window.location.href = "/";
+        }
+    </script>
+</body>
+</html>

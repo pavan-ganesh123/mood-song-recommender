@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Songs for Your Mood</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        /* 🌟 Base Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: background 0.5s ease;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            transition: background 0.5s ease;
+            position: absolute; /* Allow manual positioning */
+        }
+
+        h1 {
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.5s ease;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.5s ease;
+        }
+
+        .song-title {
+            font-weight: 500;
+        }
+
+        .controls button {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            margin: 0 5px;
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .controls button:hover {
+            background: rgba(0, 191, 255, 0.8);
+            border: 1px solid rgba(0, 191, 255, 1);
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
+        }
+
+        /* 🌈 Mood-Specific Styles */
+        body.joy {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        }
+        body.joy .container {
+            background: rgba(255, 255, 255, 0.2);
+            height: 480px;
+        }
+        body.joy h1 {
+            color: #ff6f61;
+        }
+        body.joy li {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        body.sadness {
+            background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+        }
+        body.sadness .container {
+            background: rgba(255, 255, 255, 0.2);
+            left: 75%; /* Move container to the right half */
+            transform: translateX(-50%); /* Center horizontally */
+        }
+        body.sadness h1 {
+            color: #4a90e2;
+        }
+        body.sadness li {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        body.anger {
+            background: linear-gradient(135deg, #ff6b6b, #ffa5a5);
+        }
+        body.anger .container {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        body.anger h1 {
+            color: #ff4757;
+        }
+        body.anger li {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        body.love {
+            background: linear-gradient(135deg, #ff9a9e, #fbc2eb);
+        }
+        body.love .container {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        body.love h1 {
+            color: #e84393;
+        }
+        body.love li {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        body.fear {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+        }
+        body.fear .container {
+            background:rgba(255, 255, 255, 0.2);
+        }
+        body.fear h1 {
+            color: #f6b93b;
+        }
+        body.fear li {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        body.surprise {
+            background: linear-gradient(135deg, #f6d365, #fda085);
+        }
+        body.surprise .container {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        body.surprise h1 {
+            color: #f6b93b;
+        }
+        body.surprise li {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 🎥 Video Background */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(0.7);
+        }
+    </style>
+</head>
+<body class="{{ mood }}">
+    <!-- Dynamic Video Background -->
+    <video autoplay muted loop class="video-background">
+        {% if mood == 'joy' %}
+            <source src="{{ url_for('static', filename='AstroHappy.mp4') }}" type="video/mp4">
+        {% elif mood == 'sadness' %}
+            <source src="{{ url_for('static', filename='AstroSad.mp4') }}" type="video/mp4">
+        {% elif mood == 'love' %}
+            <source src="{{ url_for('static', filename='AstroLove.mp4') }}" type="video/mp4">
+        {% elif mood == 'anger' %}
+            <source src="{{ url_for('static', filename='AstroAnger.mp4') }}" type="video/mp4">
+        {% else %}
+            <source src="{{ url_for('static', filename='Earth_FrontPage.mp4') }}" type="video/mp4">
+        {% endif %}
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="container">
+        <h1>🎵 Mood Detected: <span class="mood">{{ mood }}</span></h1>
+
+        
+        {% if songs and songs|length > 0 %}
+            <h2>Matching Songs:</h2>
+            <ul>
+                {% for song in songs %}
+                    <li>
+                        🎶 <a>{{ song.song_name }}</a>
+                        <div class="controls">
+                            <button onclick="playSong('{{ song.file_path }}', this)">▶ Play</button>
+                            <button onclick="pauseSong('{{ song.file_path }}', this)">⏸ Pause</button>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No songs found for this mood. 😔</p>
+        {% endif %}
+
+        <a href="/" class="back-button">⬅ Go Back</a>
+    </div>
+
+    <script>
+        let currentAudio = null;
+
+        function playSong(songPath, button) {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            currentAudio = new Audio(songPath);
+            currentAudio.play();
+            button.textContent = "⏹ Stop";
+            button.onclick = () => stopSong(button);
+        }
+
+        function pauseSong(songPath, button) {
+            if (currentAudio && !currentAudio.paused) {
+                currentAudio.pause();
+                button.textContent = "▶ Play";
+                button.onclick = () => playSong(songPath, button);
+            }
+        }
+
+        function stopSong(button) {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                button.textContent = "▶ Play";
+                button.onclick = () => playSong(currentAudio.src, button);
+                currentAudio = null;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+/* 🌍 Earth Video Background */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    filter: brightness(0.7); /* Slightly dim the video for better contrast */
+}
+
+/* 🚀 Floating Neon Container */
+.container {
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 50px rgba(173, 216, 230, 0.8); /* Strong neon glow */
+    width: 50%;
+    max-width: 700px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    backdrop-filter: blur(10px); /* Frosted glass effect */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+}
+
+/* 🎶 Floating Astronaut/Music GIF */
+.music-gif {
+    width: 200px;
+    border-radius: 15px;
+    margin: 20px 0;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+    100% { transform: translateY(0px); }
+}
+
+/* 🌙 Moonlight Glow Heading */
+h1 {
+    font-size: 2.7rem;
+    text-shadow: 0 0 20px rgba(30, 144, 255, 1); /* Deep blue glow */
+    color: #00c3ff;
+    margin-bottom: 20px;
+}
+
+/* ✨ Mood Highlight with Neon Glow */
+.mood {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #ff0077;
+    text-shadow: 0 0 15px #ff0077;
+}
+
+/* 🎤 Space-Themed Input */
+textarea {
+    width: 90%;
+    height: 120px;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.6);
+    margin-bottom: 20px;
+    transition: all 0.3s ease-in-out;
+}
+
+textarea:focus {
+    border: 1px solid rgba(0, 191, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 191, 255, 1);
+}
+
+/* ✨ Neon Glow Buttons */
+button {
+    background: linear-gradient(45deg, #0077ff, #4c00ff); /* Deep space colors */
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 10px;
+    border-radius: 10px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 18px rgba(0, 255, 255, 0.8);
+    animation: glow 2s infinite alternate;
+}
+
+button:hover {
+    background: linear-gradient(45deg, #4c00ff, #00c3ff);
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 1);
+}
+
+/* 🌠 Smooth Glowing Animation */
+@keyframes glow {
+    0% { box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); }
+    50% { box-shadow: 0 0 35px rgba(0, 255, 255, 1); }
+    100% { box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); }
+}
+
+/* 🎵 Song List */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 12px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease-in-out;
+}
+
+li:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.02);
+    box-shadow: 0 0 15px rgba(0, 191, 255, 0.8);
+}
+
+/* 🎧 Play/Pause Buttons */
+.controls button {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    margin: 0 5px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+}
+
+.controls button:hover {
+    background: rgba(0, 191, 255, 0.8);
+    border: 1px solid rgba(0, 191, 255, 1);
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
+}
+
+/* 🎶 Song Title */
+.song-title {
+    font-size: 1.1rem;
+    color: #00c3ff;
+    text-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
+}
+
+/* 🚀 Back Button */
+.back-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease-in-out;
+}
+
+.back-button:hover {
+    background: rgba(0, 191, 255, 0.8);
+    border: 1px solid rgba(0, 191, 255, 1);
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
+}
