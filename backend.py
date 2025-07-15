@@ -1,63 +1,97 @@
 import os
 import pandas as pd
 import joblib
-import pygame
-from flask import Flask, request, jsonify
 import nltk
+from flask import Flask, request, jsonify, url_for
+
+# Ensure punkt is available
+nltk.download('punkt', quiet=True)
 from nltk.tokenize import word_tokenize
 
-# Load the trained model and vectorizer
-model = joblib.load("best_mood_classifier.pkl")
-vectorizer = joblib.load("tfidf_vectorizer.pkl")
+app = Flask(
+    __name__,
+    static_folder="static",
+    template_folder="templates"
+)
+
+# Load model & vectorizer
+try:
+    model = joblib.load("best_mood_classifier.pkl")
+    vectorizer = joblib.load("tfidf_vectorizer.pkl")
+except FileNotFoundError as e:
+    print(f"[ERROR] Model/vectorizer not found: {e}")
+    exit(1)
 
 # Load songs dataset
-songs_df = pd.read_csv("songs.csv")
+if not os.path.exists("songs.csv"):
+    print("[ERROR] songs.csv missing")
+    exit(1)
 
-# Initialize pygame mixer
-pygame.mixer.init()
+songs_df = pd.read_csv("songs.csv", dtype=str)
 
-def play_song(file_path):
-    """Play a song using pygame."""
-    if not os.path.exists(file_path):
-        print(f"Error: File not found - {file_path}")
-        return False
+# Location of your static songs
+SONG_DIR = os.path.join(app.static_folder, "songs")
+os.makedirs(SONG_DIR, exist_ok=True)
 
-    pygame.mixer.music.load(file_path)
-    pygame.mixer.music.play()
-    print(f"Now Playing: {os.path.basename(file_path)}")
-    
-    while pygame.mixer.music.get_busy():
-        continue  # Wait until the song is finished playing
-    
-    return True  # Proceed to next song
+@app.route("/api/predict", methods=["POST"])
+def predict_api():
+    """
+    Expects JSON: { "message": "I feel amazing today!" }
+    Returns JSON: 
+      {
+        "mood": "joy",
+        "songs": [
+          { "song_name":"Bliss", "url":"/static/songs/bliss.mp3" },
+          ...
+        ]
+      }
+    """
+    data = request.get_json(silent=True)
+    if not data or "message" not in data:
+        return jsonify({"error": "Missing 'message' in JSON body"}), 400
 
-def predict_mood_and_get_songs(message):
-    """Predict mood from message and return matching song paths."""
-    processed_text = [" ".join(word_tokenize(message.lower()))]
-    text_tfidf = vectorizer.transform(processed_text)
-    
-    predicted_mood = model.predict(text_tfidf)[0]
-    mood_name = {0: "sadness", 1: "joy", 2: "love", 3: "anger"}.get(predicted_mood, "unknown")
-    
-    filtered_songs = songs_df[songs_df["moods"].str.contains(mood_name, case=False, na=False)]
-    
-    if filtered_songs.empty:
-        return {"mood": mood_name, "songs": []}
-    
-    return {"mood": mood_name, "songs": filtered_songs["file_path"].tolist()}
+    text = data["message"].strip()
+    if not text:
+        return jsonify({"mood":"unknown","songs":[]})
 
-# Flask Backend
-app = Flask(__name__)
+    # Tokenize & vectorize
+    tokens = word_tokenize(text.lower())
+    tf = vectorizer.transform([" ".join(tokens)])
+    raw = model.predict(tf)[0]
 
-@app.route("/predict_mood", methods=["GET"])
-def predict_mood():
-    """API Endpoint: Predict mood and return song list."""
-    message = request.args.get("message", "")
-    if not message:
-        return jsonify({"error": "Message is required"}), 400
-    
-    result = predict_mood_and_get_songs(message)
-    return jsonify(result)
+    # Map to mood
+    mood_map = {
+        0: "sadness",
+        1: "joy",
+        2: "love",
+        3: "anger",
+        4: "fear",
+        5: "surprise"
+    }
+    mood = mood_map.get(raw, "unknown")
+
+    # Filter songs
+    matches = songs_df[
+        songs_df["moods"].str.contains(mood, case=False, na=False)
+    ]
+
+    results = []
+    for _, row in matches.iterrows():
+        fname = os.path.basename(row["file_path"].strip())
+        static_path = f"songs/{fname}"
+        # Verify exists
+        full = os.path.join(SONG_DIR, fname)
+        if not os.path.exists(full):
+            print(f"[WARN] missing file: {full}")
+            continue
+        results.append({
+            "song_name": row.get("song_name", fname),
+            "url": url_for('static', filename=static_path, _external=False)
+        })
+
+    return jsonify({"mood": mood, "songs": results})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    # debug=True only for development
+    app.run(host="0.0.0.0", port=port, debug=True)

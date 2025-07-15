@@ -17,92 +17,90 @@
     </div>
 
     <script>
-    let currentAudio = null;
+  let currentAudio = null;
 
-    async function getSongs() {
-    let text = document.getElementById("user_input").value;
+  async function getSongs() {
+    const text = document.getElementById("user_input").value.trim();
     const resultDiv = document.getElementById("result");
-    resultDiv.innerHTML = ""; // Clear previous results
+    resultDiv.innerHTML = "";
 
-    if (!text.trim()) {
-        resultDiv.innerHTML = "<p>Please enter something to detect mood.</p>";
-        return;
+    if (!text) {
+      resultDiv.innerHTML = "<p>Please enter something to detect mood.</p>";
+      return;
     }
-
-    const formData = new FormData();
-    formData.append("text", text);
 
     try {
-        const response = await fetch('/predict', {
-            method: 'POST',
-            body: formData
-        });
+      // Send JSON to your /api/predict endpoint
+      const response = await fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
 
-        if (!response.ok) {
-            throw new Error("Server error: " + response.status);
-        }
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!data || !data.mood) {
-            resultDiv.innerHTML = "<p>Something went wrong. Try again.</p>";
-            return;
-        }
+      if (!data.mood) {
+        resultDiv.innerHTML = "<p>Something went wrong. Try again.</p>";
+        return;
+      }
 
-        resultDiv.innerHTML = `<h3>🎧 Detected Mood: <span class="mood">${data.mood}</span></h3>`;
+      // Show detected mood
+      resultDiv.innerHTML = `<h3>🎧 Detected Mood: <span class="mood">${data.mood}</span></h3>`;
 
-        if (!data.songs || data.songs.length === 0) {
-            resultDiv.innerHTML += "<p>No songs found for this mood.</p>";
-        } else {
-            let songList = "<ul>";
-            data.songs.forEach((song) => {
-                songList += `
-                    <li>
-                        <span class="song-title">${song.song_name}</span>
-                        <button class="play-btn" onclick="playSong('${song.file_path}')"><i class="fas fa-play"></i></button>
-                        <button class="pause-btn" onclick="pauseSong()"><i class="fas fa-pause"></i></button>
-                        <button class="resume-btn" onclick="resumeSong()"><i class="fas fa-play-circle"></i></button>
-                        <button class="stop-btn" onclick="stopSong()"><i class="fas fa-stop"></i></button>
-                    </li>
-                `;
-            });
-            songList += "</ul>";
-            resultDiv.innerHTML += songList;
-        }
+      // No songs case
+      if (!data.songs || data.songs.length === 0) {
+        resultDiv.innerHTML += "<p>No songs found for this mood.</p>";
+        return;
+      }
+
+      // Build the song list
+      let songList = "<ul>";
+      data.songs.forEach(song => {
+        songList += `
+          <li>
+            <span class="song-title">${song.song_name}</span>
+            <button class="play-btn" onclick="playSong('${song.url}')"><i class="fas fa-play"></i></button>
+            <button class="pause-btn" onclick="pauseSong()"><i class="fas fa-pause"></i></button>
+            <button class="resume-btn" onclick="resumeSong()"><i class="fas fa-play-circle"></i></button>
+            <button class="stop-btn" onclick="stopSong()"><i class="fas fa-stop"></i></button>
+          </li>
+        `;
+      });
+      songList += "</ul>";
+      resultDiv.innerHTML += songList;
+
     } catch (error) {
-        console.error("Prediction error:", error);
-        resultDiv.innerHTML = `<p>🚫 Error: ${error.message}</p>`;
+      console.error("Prediction error:", error);
+      resultDiv.innerHTML = `<p>🚫 Error: ${error.message}</p>`;
     }
-}
+  }
 
+  function playSong(src) {
+    if (currentAudio) currentAudio.pause();
+    currentAudio = new Audio(src);
+    currentAudio.play();
+  }
 
-    function playSong(songPath) {
-        if (currentAudio) {
-            currentAudio.pause();
-        }
-        currentAudio = new Audio(songPath);
-        currentAudio.play();
+  function pauseSong() {
+    if (currentAudio) currentAudio.pause();
+  }
+
+  function resumeSong() {
+    if (currentAudio) currentAudio.play();
+  }
+
+  function stopSong() {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
     }
-
-    function pauseSong() {
-        if (currentAudio) {
-            currentAudio.pause();
-        }
-    }
-
-    function resumeSong() {
-        if (currentAudio) {
-            currentAudio.play();
-        }
-    }
-
-    function stopSong() {
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio.currentTime = 0;
-        }
-    }
+  }
 </script>
+
 <style>
   body {
     font-family: 'Poppins', sans-serif;
