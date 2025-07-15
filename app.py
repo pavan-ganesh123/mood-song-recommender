@@ -111,5 +111,5 @@ def serve_song(filename):
     return send_from_directory(SONG_DIRECTORY, filename)
 
 if __name__ == "__main__":
-    # In development you can also set host='0.0.0.0' if testing on other devices
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Use PORT from environment or fallback to 5000
+    app.run(host="0.0.0.0", port=port, debug=True)
