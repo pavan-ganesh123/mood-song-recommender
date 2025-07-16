@@ -41,23 +41,18 @@ def home():
     return render_template("index.html")
 
 @app.route("/api/predict", methods=["POST"])
-
 def predict():
     try:
-        # 1) Parse JSON body
         data = request.get_json(force=True)
-        text = data.get("text", "").strip()
+        text = data.get("message", "").strip()  # ← FIXED FIELD NAME
 
-        # 2) If empty, return empty result
         if not text:
             return jsonify({"mood": "unknown", "songs": []})
 
-        # 3) Preprocess & vectorize
         tokens = word_tokenize(text.lower())
         processed_text = [" ".join(tokens)]
         tfidf = vectorizer.transform(processed_text)
 
-        # 4) Predict mood
         raw_pred = model.predict(tfidf)[0]
         mood_mapping = {
             0: "sadness",
@@ -69,7 +64,6 @@ def predict():
         }
         mood_name = mood_mapping.get(raw_pred, "unknown")
 
-        # 5) Filter songs by mood
         filtered = songs_df[
             songs_df["moods"].str.contains(mood_name, case=False, na=False)
         ]
@@ -77,19 +71,16 @@ def predict():
         song_list = []
         for _, row in filtered.iterrows():
             fname = os.path.basename(row["file_path"].strip())
-            # Relative URL for the browser
             rel_url = f"/static/songs/{fname}"
             song_list.append({
                 "song_name": row["song_name"],
                 "file_path": rel_url
             })
 
-        # (Optional) store in session if you still need it
         session["mood"] = mood_name
         session["songs"] = song_list
         session.modified = True
 
-        # 6) Return JSON
         return jsonify({"mood": mood_name, "songs": song_list})
 
     except Exception as e:
