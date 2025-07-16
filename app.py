@@ -44,16 +44,26 @@ def home():
 def predict():
     try:
         data = request.get_json(force=True)
-        text = data.get("message", "").strip()  # ← FIXED FIELD NAME
+        print("[DEBUG] Received data:", data)
+
+        text = data.get("message", "").strip()
+        print("[DEBUG] Message text:", text)
 
         if not text:
             return jsonify({"mood": "unknown", "songs": []})
 
+        # Preprocess
         tokens = word_tokenize(text.lower())
+        print("[DEBUG] Tokens:", tokens)
+
         processed_text = [" ".join(tokens)]
         tfidf = vectorizer.transform(processed_text)
+        print("[DEBUG] TF-IDF shape:", tfidf.shape)
 
+        # Prediction
         raw_pred = model.predict(tfidf)[0]
+        print("[DEBUG] Raw prediction:", raw_pred)
+
         mood_mapping = {
             0: "sadness",
             1: "joy",
@@ -63,10 +73,11 @@ def predict():
             5: "surprise"
         }
         mood_name = mood_mapping.get(raw_pred, "unknown")
+        print("[DEBUG] Detected mood:", mood_name)
 
-        filtered = songs_df[
-            songs_df["moods"].str.contains(mood_name, case=False, na=False)
-        ]
+        # Filter songs
+        filtered = songs_df[songs_df["moods"].str.contains(mood_name, case=False, na=False)]
+        print("[DEBUG] Found songs:", len(filtered))
 
         song_list = []
         for _, row in filtered.iterrows():
@@ -77,14 +88,10 @@ def predict():
                 "file_path": rel_url
             })
 
-        session["mood"] = mood_name
-        session["songs"] = song_list
-        session.modified = True
-
         return jsonify({"mood": mood_name, "songs": song_list})
 
     except Exception as e:
-        print(f"[ERROR] Prediction failed: {e}")
+        print("[ERROR] Prediction failed:", e)
         return jsonify({"error": str(e)}), 500
 
 @app.route("/songs")
