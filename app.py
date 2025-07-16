@@ -39,61 +39,57 @@ os.makedirs(SONG_DIRECTORY, exist_ok=True)
 @app.route("/")
 def home():
     return render_template("index.html")
-
 @app.route("/api/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json(force=True)
-        print("[DEBUG] Received data:", data)
+        print("✅ [DEBUG] Raw input:", data)
 
+        # Be sure the frontend sends 'message', not 'text'
         text = data.get("message", "").strip()
-        print("[DEBUG] Message text:", text)
+        print("✅ [DEBUG] Cleaned text:", text)
 
         if not text:
             return jsonify({"mood": "unknown", "songs": []})
 
-        # Preprocess
+        # Preprocessing
         tokens = word_tokenize(text.lower())
-        print("[DEBUG] Tokens:", tokens)
+        print("✅ [DEBUG] Tokens:", tokens)
 
         processed_text = [" ".join(tokens)]
         tfidf = vectorizer.transform(processed_text)
-        print("[DEBUG] TF-IDF shape:", tfidf.shape)
+        print("✅ [DEBUG] Vector shape:", tfidf.shape)
 
         # Prediction
         raw_pred = model.predict(tfidf)[0]
-        print("[DEBUG] Raw prediction:", raw_pred)
-
         mood_mapping = {
-            0: "sadness",
-            1: "joy",
-            2: "love",
-            3: "anger",
-            4: "fear",
-            5: "surprise"
+            0: "sadness", 1: "joy", 2: "love",
+            3: "anger", 4: "fear", 5: "surprise"
         }
         mood_name = mood_mapping.get(raw_pred, "unknown")
-        print("[DEBUG] Detected mood:", mood_name)
+        print("✅ [DEBUG] Mood:", mood_name)
 
         # Filter songs
         filtered = songs_df[songs_df["moods"].str.contains(mood_name, case=False, na=False)]
-        print("[DEBUG] Found songs:", len(filtered))
+        print("✅ [DEBUG] Songs found:", len(filtered))
 
         song_list = []
         for _, row in filtered.iterrows():
-            fname = os.path.basename(row["file_path"].strip())
-            rel_url = f"/static/songs/{fname}"
+            file_name = os.path.basename(row["file_path"].strip())
+            full_path = os.path.join(app.static_folder, "songs", file_name)
+            if not os.path.exists(full_path):
+                print(f"⚠️ Missing file: {full_path}")
+                continue
             song_list.append({
                 "song_name": row["song_name"],
-                "file_path": rel_url
+                "url": f"/static/songs/{file_name}"
             })
 
         return jsonify({"mood": mood_name, "songs": song_list})
 
     except Exception as e:
-        print("[ERROR] Prediction failed:", e)
+        print("❌ [ERROR] Exception in /api/predict:", e)
         return jsonify({"error": str(e)}), 500
-
 @app.route("/songs")
 def songs():
     """ If you still want a /songs page rendering via Jinja """
