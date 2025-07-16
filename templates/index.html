@@ -15,8 +15,7 @@
         <button onclick="getSongs()">Find Songs</button>
         <div id="result"></div>
     </div>
-
-    <script>
+<script>
   let currentAudio = null;
 
   async function getSongs() {
@@ -30,7 +29,6 @@
     }
 
     try {
-      // Send JSON to your /api/predict endpoint
       const response = await fetch('/api/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,22 +46,19 @@
         return;
       }
 
-      // Show detected mood
       resultDiv.innerHTML = `<h3>🎧 Detected Mood: <span class="mood">${data.mood}</span></h3>`;
 
-      // No songs case
       if (!data.songs || data.songs.length === 0) {
         resultDiv.innerHTML += "<p>No songs found for this mood.</p>";
         return;
       }
 
-      // Build the song list
       let songList = "<ul>";
       data.songs.forEach(song => {
         songList += `
           <li>
             <span class="song-title">${song.song_name}</span>
-            <button class="play-btn" onclick="playSong('${song.url}')"><i class="fas fa-play"></i></button>
+            <button class="play-btn" onclick="playSong('${song.file_path}')"><i class="fas fa-play"></i></button>
             <button class="pause-btn" onclick="pauseSong()"><i class="fas fa-pause"></i></button>
             <button class="resume-btn" onclick="resumeSong()"><i class="fas fa-play-circle"></i></button>
             <button class="stop-btn" onclick="stopSong()"><i class="fas fa-stop"></i></button>
